@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Model.bounderies
+namespace Model.Mappers
 {
-    internal class PlayerDto
+    public class MappersAssemble
     {
     }
 }
