@@ -12,6 +12,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(MappersAssemble).Assembly);
+builder.Services.AddSingleton<IRepository<Player>, Repository<Player>>();
 
 var app = builder.Build();
 
@@ -23,7 +24,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+ 
 app.UseRouting();
 
 app.UseAuthorization();
@@ -32,5 +33,6 @@ app.UseEndpoints( endpoints =>
 {
     endpoints.MapControllers();
 });
+
 
 app.Run();
