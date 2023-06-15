@@ -22,7 +22,7 @@
           "path": "logs/connectFour.log",
           "shared": "true",
           "fileSizeLimitBytes": "1000000",
-          "rollOnFileSizeLimit": true,
+          "rollOnFileSizeLimit": true
         }
       }
     ]

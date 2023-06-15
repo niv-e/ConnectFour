@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using BusinessLogic;
+using BusinessLogic.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using Model.bounderies;
 using Model.Dtos;
@@ -12,14 +12,15 @@ namespace ConnectFourGame.API.Controllers
 
     public class ProfileManagementController : ControllerBase
     {
+        private readonly IPlayerService _playerService;
         private readonly ILogger<ProfileManagementController> _logger;
-        private readonly IRepository<Player> _playerRepository;
         private readonly IMapper _mapper;
 
-        public ProfileManagementController(ILogger<ProfileManagementController> logger, IRepository<Player> playerRepository, IMapper mapper)
+
+        public ProfileManagementController(ILogger<ProfileManagementController> logger, IPlayerService playerService, IMapper mapper)
         {
             _logger = logger;
-            _playerRepository = playerRepository;
+            _playerService = playerService;
             _mapper = mapper;
         }
 
@@ -29,11 +30,9 @@ namespace ConnectFourGame.API.Controllers
         {
             try
             {
-                Player player = _mapper.Map<PlayerBoundary, Player>(playerBoundary);
+                Player player = await _playerService.RegisterPlayer(playerBoundary);
 
-                await _playerRepository.Insert(player);
-
-                return Ok(_mapper.Map<Player, PlayerDto>(player));
+                return Ok(_mapper.Map<Player,PlayerDto>(player));
             }catch (Exception ex)
             {
                 return BadRequest(ex.Message);
