@@ -1,6 +1,11 @@
-{
+﻿{
   "Serilog": {
-    "MinimumLevel": "Debug",
+    "MinimumLevel": {
+      "Default": "Debug",
+      "Override": {
+        "Microsoft": "Information"
+      }
+    },
     "Using": [ "Serilog.Sinks.Console", "Serilog.Sinks.File" ],
     "WriteTo": [
       {
@@ -18,17 +23,8 @@
           "shared": "true",
           "fileSizeLimitBytes": "1000000",
           "rollOnFileSizeLimit": true,
-          "flushToDiskInterval": "1"
         }
       }
     ]
-  },
-
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
-    }
-  },
-  "AllowedHosts": "*"
+  }
 }

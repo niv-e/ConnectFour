@@ -12,11 +12,13 @@ namespace ConnectFourGame.API.Controllers
 
     public class ProfileManagementController : ControllerBase
     {
+        private readonly ILogger<ProfileManagementController> _logger;
         private readonly IRepository<Player> _playerRepository;
         private readonly IMapper _mapper;
 
-        public ProfileManagementController(IRepository<Player> playerRepository, IMapper mapper)
+        public ProfileManagementController(ILogger<ProfileManagementController> logger, IRepository<Player> playerRepository, IMapper mapper)
         {
+            _logger = logger;
             _playerRepository = playerRepository;
             _mapper = mapper;
         }
