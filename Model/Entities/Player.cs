@@ -1,13 +1,22 @@
-﻿namespace Model.Entities
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Model.Entities
 {
     public class Player
     {
-        public int Id { get; init; }
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public int PlayerId { get; init; }
 
+        [Required(ErrorMessage = "First name is a mandatory field")]
+        [MinLength(2, ErrorMessage = "First name must have atleaste 2 characters")]
         public string FirstName { get; set; } = string.Empty;
-
+        
+        [Phone(ErrorMessage = "Invalid phone number")]
         public string PhoneNumber { get; set; } = string.Empty;
-
+        
+        [MinLength(1, ErrorMessage = "Country cannot set to empty string")]
         public string Country { get; set; } = string.Empty;
     }
 }

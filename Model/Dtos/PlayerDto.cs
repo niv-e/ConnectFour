@@ -9,9 +9,9 @@ namespace Model.Dtos
 
         public string FirstName { get; set; } = string.Empty;
 
-        //public string PhoneNumber { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
 
-        //public string Country { get; set; } = string.Empty;
+        public string Country { get; set; } = string.Empty;
 
 
     }
