@@ -12,19 +12,22 @@ namespace BusinessLogic
         private readonly IRepository<GameSession> GameSessionRepository;
         private const int _playerNumber = 1;
         private const int _serverNumber = 2;
+        private int[] nextXPosition = { 0 };
 
         public GameService(IRepository<GameSession> gameSessionRepository)
         {
             GameSessionRepository = gameSessionRepository;
         }
-        public bool PlacePawn(GameSession gameSession,Point point)
+        public async Task<bool> PlacePawn(Guid gameSessionId,int colIndex)
         {
+            var gameSession = await GameSessionRepository.GetById(gameSessionId);
+
             if (gameSession?.GameState?.IsPlayersTurn is false)
             {
                 return false;
             }
 
-            var valInPoint = gameSession.GameState?.GameBoard[point.X,point.Y];
+            var valInPoint = gameSession.GameState?.GameBoard[nextXPosition[colIndex-1], colIndex];
 
             if (valInPoint.HasValue)
             {
@@ -32,7 +35,7 @@ namespace BusinessLogic
             }
 
             valInPoint = _playerNumber;
-
+            nextXPosition[colIndex - 1]++;
             return true;
         }
 
@@ -58,7 +61,8 @@ namespace BusinessLogic
                 Player = player,
                 GameState = new GameState()
                 {
-                    IsPlayersTurn = bool.Parse(Random.Shared.Next(1).ToString())
+                    IsPlayersTurn = Random.Shared.Next(1) == 1 ? true : false,
+                    GameBoard = new int[6,7]
                 },
                 StaringTime = DateTime.Now
             };

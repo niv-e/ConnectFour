@@ -22,8 +22,11 @@ builder.Services.AddLogging();
 
 builder.Services.AddAutoMapper(typeof(MappersAssemble).Assembly);
 IRepository<Player> playersRepository = RepositoryFactory.CreateRepository<Player>(builder.Configuration);
+IRepository<GameSession> gameSessionRepository = RepositoryFactory.CreateRepository<GameSession>(builder.Configuration);
 builder.Services.AddSingleton(playersRepository);
+builder.Services.AddSingleton(gameSessionRepository);
 builder.Services.AddSingleton< IPlayerService,PlayerService>();
+builder.Services.AddSingleton< GameService>();
 
 var app = builder.Build();
 
@@ -47,3 +50,5 @@ app.UseEndpoints( endpoints =>
 
 
 app.Run();
+// Make the implicit Program class public so test projects can access it
+public partial class Program { }

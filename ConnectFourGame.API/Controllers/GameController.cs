@@ -28,6 +28,7 @@ namespace ConnectFourGame.API.Controllers
         
         public async Task<ActionResult> StartNewGame(int playerId)
         {
+            //TODO:fix the game board System.Int32[,]' is not supported issue
             Player? player = await _playerService.GetPlayerById(playerId);
 
             if(player == null)
@@ -42,7 +43,7 @@ namespace ConnectFourGame.API.Controllers
                  {
                      sessionId = gameSession.SessionId
                  },
-                 gameSession);
+                 _mapper.Map<GameSession, GameSessionDto>(gameSession));
         }
 
         [HttpGet("{sessionid}", Name = "GetSessionById")]
@@ -57,5 +58,19 @@ namespace ConnectFourGame.API.Controllers
 
             return Ok(_mapper.Map<GameSession, GameSessionDto>(session));
         }
+       
+        [HttpGet("{sessionid}/{colIndex}")]
+        public async Task<ActionResult> PlacePawn(Guid sessionId,int colIndex)
+        {
+            var placmentResults = await _gameService.PlacePawn(sessionId, colIndex);
+
+            if (placmentResults == true)
+            {
+                return Ok();
+            }
+
+            return BadRequest();
+        }
+
     }
 }
