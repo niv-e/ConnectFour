@@ -4,30 +4,36 @@ using BusinessLogic.Contracts;
 using Model.Dtos;
 using Model.Entities;
 using System.Drawing;
+using System.Text.Json;
 
 namespace BusinessLogic
 {
-    public class GameService
+    public class GameService : IGameService
     {
         private readonly IRepository<GameSession> GameSessionRepository;
+        private readonly IMapper _mapper;
         private const int _playerNumber = 1;
         private const int _serverNumber = 2;
         private int[] nextXPosition = { 0 };
 
-        public GameService(IRepository<GameSession> gameSessionRepository)
+        public GameService(IRepository<GameSession> gameSessionRepository, IMapper mapper)
         {
             GameSessionRepository = gameSessionRepository;
+            _mapper = mapper;
         }
-        public async Task<bool> PlacePawn(Guid gameSessionId,int colIndex)
+        public async Task<bool> PlacePawn(Guid gameSessionId, int colIndex)
         {
-            var gameSession = await GameSessionRepository.GetById(gameSessionId);
+            var gameSessionEntity = await GameSessionRepository.GetById(gameSessionId);
+
+            GameSessionDto gameSession = _mapper.Map<GameSessionDto>(gameSessionEntity);
+
 
             if (gameSession?.GameState?.IsPlayersTurn is false)
             {
                 return false;
             }
 
-            var valInPoint = gameSession.GameState?.GameBoard[nextXPosition[colIndex-1], colIndex];
+            var valInPoint = gameSession.GameState?.GameBoard[nextXPosition[colIndex - 1], colIndex];
 
             if (valInPoint.HasValue)
             {
@@ -39,19 +45,21 @@ namespace BusinessLogic
             return true;
         }
 
-        public Task<GameSession?> GetSessionById(Guid sessionId)
+        public async Task<GameSessionDto?> GetSessionById(Guid sessionId)
         {
-            return GameSessionRepository.GetById(sessionId);
+            GameSession? gameSession = await GameSessionRepository.GetById(sessionId);
+
+            return _mapper.Map<GameSessionDto>(gameSession);
 
         }
 
-        public async Task<GameSession> StartGame(Player player)
+        public async Task<GameSessionDto> StartGame(Player player)
         {
             GameSession session = CreateGameSession(player);
 
             await GameSessionRepository.Insert(session);
 
-            return session;
+            return _mapper.Map<GameSessionDto>(session);
         }
 
         private GameSession CreateGameSession(Player player)
@@ -59,10 +67,9 @@ namespace BusinessLogic
             return new GameSession
             {
                 Player = player,
-                GameState = new GameState()
+                GameState = new()
                 {
                     IsPlayersTurn = Random.Shared.Next(1) == 1 ? true : false,
-                    GameBoard = new int[6,7]
                 },
                 StaringTime = DateTime.Now
             };

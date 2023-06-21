@@ -17,6 +17,7 @@ namespace Model.Mappers
             CreateMap<PlayerBoundary, Player>();
             CreateMap<Player, PlayerBoundary>();
             CreateMap<Player, PlayerDto>();
+            CreateMap<PlayerDto, PlayerBoundary>();
         }
     }
 }

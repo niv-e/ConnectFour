@@ -1,22 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Model.Entities
+namespace Model.Dtos
 {
-    public class GameState
+    public class GameStateDto
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid GameStateId { get; set; }
-        public string GameBoard { get; set; } = String.Empty;
-
+        public int[,] GameBoard { get; set; } = new int[6,7];
         public bool IsPlayersTurn { get; set; }
-
     }
 }

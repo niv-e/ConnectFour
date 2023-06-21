@@ -1,18 +1,18 @@
-﻿using Model.Entities;
+﻿using Model.bounderies;
+using Model.Dtos;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Model.Dtos
+namespace Model.Boundaries
 {
-    public class GameSessionDto
+    public class GameSessionBoundary
     {
         public Guid SessionId { get; set; }
-        public GameStateDto? GameState { get; set; }
-        public PlayerDto? Player { get; set; }
+        public GameStateBoundary? GameState { get; set; }
+        public PlayerBoundary? Player { get; set; }
         public DateTime StaringTime { get; set; }
         public TimeSpan GameDuration { get; set; }
 

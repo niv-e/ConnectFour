@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Model.Boundaries;
 using Model.Dtos;
 using Model.Entities;
 using System;
@@ -15,6 +16,7 @@ namespace Model.Mappers
         {
             CreateMap<GameSession, GameSessionDto>();
             CreateMap<GameSessionDto, GameSession>();
+            CreateMap<GameSessionDto, GameSessionBoundary>();
         }
     }
 }

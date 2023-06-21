@@ -1,8 +1,5 @@
 using BusinessLogic;
 using BusinessLogic.Contracts;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Model.bounderies;
 using Model.Entities;
 using Model.Mappers;
 using Serilog;
@@ -21,12 +18,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddLogging();
 
 builder.Services.AddAutoMapper(typeof(MappersAssemble).Assembly);
-IRepository<Player> playersRepository = RepositoryFactory.CreateRepository<Player>(builder.Configuration);
-IRepository<GameSession> gameSessionRepository = RepositoryFactory.CreateRepository<GameSession>(builder.Configuration);
-builder.Services.AddSingleton(playersRepository);
-builder.Services.AddSingleton(gameSessionRepository);
-builder.Services.AddSingleton< IPlayerService,PlayerService>();
-builder.Services.AddSingleton< GameService>();
+
+AddCustomServices(builder);
 
 var app = builder.Build();
 
@@ -34,21 +27,31 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(); 
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
- 
+
 app.UseRouting();
 
 app.UseAuthorization();
 
-app.UseEndpoints( endpoints =>
+app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
 });
 
 
 app.Run();
+
+static void AddCustomServices(WebApplicationBuilder builder)
+{
+    IRepository<Player> playersRepository = RepositoryFactory.CreateRepository<Player>(builder.Configuration);
+    IRepository<GameSession> gameSessionRepository = RepositoryFactory.CreateRepository<GameSession>(builder.Configuration);
+    builder.Services.AddSingleton(playersRepository);
+    builder.Services.AddSingleton(gameSessionRepository);
+    builder.Services.AddSingleton<IPlayerService, PlayerService>();
+    builder.Services.AddSingleton<IGameService, GameService>();
+}
 // Make the implicit Program class public so test projects can access it
 public partial class Program { }
