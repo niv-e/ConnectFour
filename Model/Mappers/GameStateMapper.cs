@@ -43,16 +43,6 @@ namespace Model.Mappers
                     boundary.GameBoard[row][col] = source.GameBoard[row, col];
                 }
             }
-            //Enumerable.Range(0, source.GameBoard.GetLength(0))
-            //                .ToList()
-            //                .ForEach(row =>
-            //                    Enumerable.Range(0, source.GameBoard.GetLength(1))
-            //                        .ToList()
-            //                        .ForEach(col =>
-            //                            boundary.GameBoard[row][col] = source.GameBoard[row, col]
-            //                        )
-            //                );
-
             return boundary;
         }
     }
