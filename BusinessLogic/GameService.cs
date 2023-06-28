@@ -28,14 +28,14 @@ namespace BusinessLogic
             GameSessionDto gameSession = _mapper.Map<GameSessionDto>(gameSessionEntity);
 
 
-            if (gameSession?.GameState?.IsPlayersTurn is false)
-            {
-                return false;
-            }
+            //if (gameSession?.GameState?.IsPlayersTurn is false)
+            //{
+            //    return false;
+            //}
 
             var valInPoint = gameSession.GameState?.GameBoard[nextXPosition[colIndex - 1], colIndex];
 
-            if (valInPoint.HasValue)
+            if (valInPoint.Value != 0)
             {
                 return false;
             }

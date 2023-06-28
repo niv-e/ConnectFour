@@ -16,15 +16,19 @@ namespace ConnectFourGame.API.Controllers
         private readonly IGameService _gameService;
         private readonly IPlayerService _playerService = null!;
         private readonly IMapper _mapper;
-        private readonly ILogger _logger;
+        private readonly ILogger<GameController> _logger;
 
 
-        public GameController(IGameService gameService, IPlayerService playerService, IMapper mapper, ILogger logger)
+        public GameController(
+            IGameService gameService,
+            IPlayerService playerService,
+            IMapper mapper,
+            ILogger<GameController> logger)
         {
             _gameService = gameService ?? throw new ArgumentNullException(nameof(IGameService));
             _playerService = playerService ?? throw new ArgumentNullException(nameof(IPlayerService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(IMapper));
-            _logger = logger ?? throw new ArgumentNullException(nameof(ILogger)); ;
+            _logger = logger ?? throw new ArgumentNullException(nameof(ILogger));
         }
 
         [HttpGet("start/{playerId}")]
@@ -69,8 +73,8 @@ namespace ConnectFourGame.API.Controllers
             return Ok(_mapper.Map<GameSessionBoundary>(session));
         }
        
-        [HttpGet("{sessionid}/{colIndex}")]
-        public async Task<ActionResult> PlacePawn(Guid sessionId,int colIndex)
+        [HttpPost("{sessionid}")]
+        public async Task<ActionResult> PlacePawn(Guid sessionId,[FromBody] int colIndex)
         {
             var placmentResults = await _gameService.PlacePawn(sessionId, colIndex);
 
