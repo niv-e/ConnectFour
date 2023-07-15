@@ -16,9 +16,9 @@ namespace BusinessLogic
     {
         private readonly IMapper _mapper;
         private readonly ILogger<PlayerService> _logger;
-        private readonly IRepository<Player> _playerRepository;
+        private readonly IPlayerRepository _playerRepository;
 
-        public PlayerService(ILogger<PlayerService> logger, IRepository<Player> playerRepository, IMapper mapper)
+        public PlayerService(ILogger<PlayerService> logger, IPlayerRepository playerRepository, IMapper mapper)
         {
             _logger = logger;
             _playerRepository = playerRepository;
@@ -36,7 +36,7 @@ namespace BusinessLogic
 
                 _logger.LogDebug("Player Boundary maped to player : {Player}", player);
 
-                await _playerRepository.Insert(player);
+                await _playerRepository.InsertPlayer(player);
 
                 _logger.LogDebug("Player : {Player} was inserted to the database", player);
 
@@ -52,7 +52,7 @@ namespace BusinessLogic
 
         public Task<Player?> GetPlayerById(int id)
         {
-            return _playerRepository.GetById(id);
+            return _playerRepository.GetPlayerById(id);
         }
     }
 }

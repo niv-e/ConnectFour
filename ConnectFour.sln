@@ -11,9 +11,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Model", "Model\Model.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utilities", "Utilities\Utilities.csproj", "{C0676433-5E32-4465-8C47-FF666921E5D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectFourGame.API.IntegrationTests", "IntegrationTests\ConnectFourGame.API.IntegrationTests.csproj", "{E406870E-8210-4AF6-AEF8-CAC58BA1CB3E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConnectFourGame.API.IntegrationTests", "IntegrationTests\ConnectFourGame.API.IntegrationTests.csproj", "{E406870E-8210-4AF6-AEF8-CAC58BA1CB3E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectFourConsoleClient", "ConnectFourConsoleClient\ConnectFourConsoleClient.csproj", "{F08C3713-E939-4438-9FE1-B01571ABFD6D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConnectFourConsoleClient", "ConnectFourConsoleClient\ConnectFourConsoleClient.csproj", "{F08C3713-E939-4438-9FE1-B01571ABFD6D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConnectFourWinformClient", "ConnectFourWinformClient\ConnectFourWinformClient.csproj", "{22D4C527-8A4B-4D59-BD71-E4BE1AA39041}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{F08C3713-E939-4438-9FE1-B01571ABFD6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F08C3713-E939-4438-9FE1-B01571ABFD6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F08C3713-E939-4438-9FE1-B01571ABFD6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22D4C527-8A4B-4D59-BD71-E4BE1AA39041}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22D4C527-8A4B-4D59-BD71-E4BE1AA39041}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22D4C527-8A4B-4D59-BD71-E4BE1AA39041}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22D4C527-8A4B-4D59-BD71-E4BE1AA39041}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

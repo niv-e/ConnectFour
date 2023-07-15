@@ -67,16 +67,31 @@ namespace Model.Mappers
             int colCount = gameStateDto.GameBoard.GetLength(1);
 
             var flatten = JsonSerializer.Deserialize<int[]>(source.GameBoard);
+            int index = 0;
 
-            Enumerable.Range(0, rowCount)
-            .ToList()
-            .ForEach(row =>
-                Enumerable.Range(0, colCount)
-                    .ToList()
-                    .ForEach(col =>
-                        gameStateDto.GameBoard[row, col] = flatten.ElementAt(row + col)
-                    )
-            );
+            for (int i = 0; i < rowCount; i++)
+            {
+                for(int j = 0; j < colCount; j++)
+                {
+                    gameStateDto.GameBoard[i, j] = flatten[index++];
+                }
+            }
+
+
+            //int index = -1;
+            //flatten
+            //    .ToList()
+            //    .ForEach(val => gameStateDto.GameBoard.GetValue(index) = val);
+
+            //Enumerable.Range(0, rowCount)
+            //.ToList()
+            //.ForEach(row =>
+            //    Enumerable.Range(0, colCount)
+            //        .ToList()
+            //        .ForEach(col =>
+            //            gameStateDto.GameBoard[row, col] = flatten.ElementAt(row + col)
+            //        )
+            //);
 
 
             return gameStateDto;
@@ -87,11 +102,8 @@ namespace Model.Mappers
     {
         public GameState Convert(GameStateDto source, GameState destination, ResolutionContext context)
         {
-            var gameState = new GameState
-            {
-                GameStateId = source.GameStateId,
-                IsPlayersTurn = source.IsPlayersTurn
-            };
+            destination.GameStateId = source.GameStateId;
+            destination.IsPlayersTurn = source.IsPlayersTurn;
 
             if (source.GameBoard != null)
             {
@@ -106,7 +118,7 @@ namespace Model.Mappers
                 destination.GameBoard = JsonSerializer.Serialize(flattenBoard);
             }
 
-            return gameState;
+            return destination;
         }
     }
 }

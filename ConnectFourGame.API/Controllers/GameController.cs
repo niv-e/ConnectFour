@@ -73,18 +73,51 @@ namespace ConnectFourGame.API.Controllers
             return Ok(_mapper.Map<GameSessionBoundary>(session));
         }
        
-        [HttpPost("{sessionid}")]
-        public async Task<ActionResult> PlacePawn(Guid sessionId,[FromBody] int colIndex)
+        [HttpGet("{sessionid}/{colIndex}")]
+        public async Task<ActionResult> PlacePawn(Guid sessionId, int colIndex)
         {
             var placmentResults = await _gameService.PlacePawn(sessionId, colIndex);
 
-            if (placmentResults == true)
+            if (placmentResults != null)
             {
-                return Ok();
+                return Ok(placmentResults);
             }
 
             return BadRequest();
         }
+
+        [HttpGet("getopponentmove/{sessionid}")]
+        public async Task<ActionResult> GetOpponentMove(Guid sessionId)
+        {
+            var placmentResults = await _gameService.GetOpponentMove(sessionId);
+
+            if (placmentResults != null)
+            {
+                return Ok(placmentResults);
+            }
+
+            return StatusCode(500);
+
+
+        }
+
+        [HttpGet("getwinnersequence/{sessionid}")]
+        public async Task<ActionResult> GetWinnerSequenceIfExist(Guid sessionId)
+        {
+
+            try
+            {
+                IEnumerable<Tuple<int, int>> sequence = await _gameService.TryToGetWinnerSequence(sessionId);
+                return Ok(sequence);
+
+            }
+            catch (Exception e)
+            {
+
+                return StatusCode(500,e);
+            }
+        }
+
 
     }
 }

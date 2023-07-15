@@ -38,5 +38,21 @@ namespace ConnectFourGame.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("{playerid}", Name = "GetPlayerById")]
+        public async Task<ActionResult<PlayerDto>> GetPlayerById(int playerid)
+        {
+            try
+            {
+                Player player = await _playerService.GetPlayerById(playerid);
+
+                return Ok(_mapper.Map<Player, PlayerDto>(player));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }

@@ -14,10 +14,15 @@ namespace Model.Mappers
     {
         public PlayerMapper()
         {
-            CreateMap<PlayerBoundary, Player>();
             CreateMap<Player, PlayerBoundary>();
+            CreateMap<PlayerBoundary, Player>();
+
             CreateMap<Player, PlayerDto>();
+            CreateMap<PlayerDto, Player>();
+
             CreateMap<PlayerDto, PlayerBoundary>();
+            CreateMap<PlayerBoundary, PlayerDto>();
+
         }
     }
 }

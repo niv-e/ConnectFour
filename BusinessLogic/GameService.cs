@@ -1,53 +1,90 @@
 ﻿
 using AutoMapper;
+using BusinessLogic.BoardCheck;
 using BusinessLogic.Contracts;
+using BusinessLogic.Responses;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Model.Dtos;
 using Model.Entities;
+using System.ComponentModel.Design;
 using System.Drawing;
+using System.Linq;
 using System.Text.Json;
 
 namespace BusinessLogic
 {
-    public class GameService : IGameService
+    public partial class GameService : IGameService
     {
-        private readonly IRepository<GameSession> GameSessionRepository;
+        private readonly IGameSessionRepository _gameSessionRepository;
         private readonly IMapper _mapper;
-        private const int _playerNumber = 1;
-        private const int _serverNumber = 2;
-        private int[] nextXPosition = { 0 };
+        private readonly ILogger<GameService> _logger;
+        private readonly IBoardChecker _boardChecker;
 
-        public GameService(IRepository<GameSession> gameSessionRepository, IMapper mapper)
+
+        public GameService(IGameSessionRepository gameSessionRepository, IMapper mapper, ILogger<GameService> logger,
+            IBoardChecker boardChecker)
         {
-            GameSessionRepository = gameSessionRepository;
             _mapper = mapper;
+            _logger = logger;
+            _boardChecker = boardChecker;
+            _gameSessionRepository = gameSessionRepository;
         }
-        public async Task<bool> PlacePawn(Guid gameSessionId, int colIndex)
+        public async Task<PlacePawnResponse> PlacePawn(Guid gameSessionId, int colIndex)
         {
-            var gameSessionEntity = await GameSessionRepository.GetById(gameSessionId);
+            GameSessionDto gameSession = await GetSessionDto(gameSessionId);
 
-            GameSessionDto gameSession = _mapper.Map<GameSessionDto>(gameSessionEntity);
+            Tuple<int,int> placePosition = PlacePawnInColumn(
+                gameSession.GameState?.GameBoard, colIndex,PawnType.Player);
 
+            gameSession.GameState.IsPlayersTurn = false;
 
-            //if (gameSession?.GameState?.IsPlayersTurn is false)
-            //{
-            //    return false;
-            //}
+            UpdateSessionStatus(gameSession);
 
-            var valInPoint = gameSession.GameState?.GameBoard[nextXPosition[colIndex - 1], colIndex];
+            await ConvertToEntityAndUpdateDatabase(gameSession);
 
-            if (valInPoint.Value != 0)
+            return new PlacePawnResponse
             {
-                return false;
-            }
+                Position = placePosition,
+                IsGameEndedWithWin = gameSession.GameState.HasWinner,
+                LeftMoves = gameSession.GameState.LeftMoves,
+                IsPlayerTurn = true
+            };
+        }
 
-            valInPoint = _playerNumber;
-            nextXPosition[colIndex - 1]++;
-            return true;
+
+        public async Task<PlacePawnResponse> GetOpponentMove(Guid gameSessionId)
+        {
+            GameSessionDto gameSession = await GetSessionDto(gameSessionId);
+
+            var randomColumnToInsert = Random
+                .Shared
+                .Next((int)gameSession.GameState?.GameBoard.GetLength(1));
+
+
+            Tuple<int, int> placePosition = PlacePawnInColumn(
+                gameSession.GameState?.GameBoard, randomColumnToInsert, PawnType.Server);
+
+            gameSession.GameState.IsPlayersTurn = true;
+
+            UpdateSessionStatus(gameSession);
+
+            await ConvertToEntityAndUpdateDatabase(gameSession);
+
+            return new PlacePawnResponse
+            {
+                Position = placePosition,
+                IsGameEndedWithWin = gameSession.GameState.HasWinner,
+                LeftMoves = gameSession.GameState.LeftMoves,
+                IsPlayerTurn = false
+
+            };
+
         }
 
         public async Task<GameSessionDto?> GetSessionById(Guid sessionId)
         {
-            GameSession? gameSession = await GameSessionRepository.GetById(sessionId);
+            GameSession? gameSession = await _gameSessionRepository.GetSessionById(sessionId);
 
             return _mapper.Map<GameSessionDto>(gameSession);
 
@@ -57,9 +94,106 @@ namespace BusinessLogic
         {
             GameSession session = CreateGameSession(player);
 
-            await GameSessionRepository.Insert(session);
+            await _gameSessionRepository.Insert(session);
 
             return _mapper.Map<GameSessionDto>(session);
+        }
+        public async Task<IEnumerable<Tuple<int, int>>> TryToGetWinnerSequence(Guid gameSessionId)
+        {
+            GameSessionDto gameSession = await GetSessionDto(gameSessionId);
+
+            UpdateSessionStatus(gameSession);
+
+            if (gameSession.GameState.HasWinner == false &&
+                gameSession.GameState.LeftMoves == 0)
+            {
+                throw new ArgumentException("Game has no winner");
+            }
+
+            if (gameSession.GameState.HasWinner == false &&
+                 gameSession.GameState.LeftMoves > 0)
+            {
+                throw new ArgumentException("Game not ended");
+            }
+
+            if(gameSession.GameState.HasWinner)
+            {
+                return gameSession.GameState.WinnerSequence;
+            }
+
+            throw new ArgumentException("Game not ended");
+
+        }
+
+        private void UpdateSessionStatus(GameSessionDto gameSession)
+        {
+            IEnumerable<Tuple<int, int>> pawnSequence =
+                _boardChecker.GetPawnSequenceIfExists(gameSession.GameState.GameBoard);
+            gameSession.GameState.LeftMoves = GetNumberOfLeftMoves(gameSession.GameState);
+
+            if (pawnSequence.Count().Equals(4))
+            {
+                gameSession.GameState.IsGameEnded = true;
+                gameSession.GameState.HasWinner = true;
+                gameSession.GameState.WinnerSequence = pawnSequence;
+                gameSession.GameDuration = DateTime.Now - gameSession.StaringTime;
+            }
+        }
+
+        private int GetNumberOfLeftMoves(GameStateDto gameState)
+        {
+            int rowCount = gameState.GameBoard.GetLength(0);
+            int colCount = gameState.GameBoard.GetLength(1);
+
+            int leftMoves = rowCount * colCount;
+
+            for (int i = 0; i < rowCount; i++)
+            {
+                for (int j = 0; j < colCount; j++)
+                {
+                    leftMoves = gameState.GameBoard[i, j] == 0 ?
+                        leftMoves :
+                        leftMoves--;
+                }
+            }
+
+            return leftMoves;
+
+        }
+
+        private async Task<GameSessionDto> GetSessionDto(Guid gameSessionId)
+        {
+
+            var gameSessionEntity = await _gameSessionRepository.GetSessionById(gameSessionId);
+
+            GameSessionDto gameSession = _mapper.Map<GameSessionDto>(gameSessionEntity);
+
+            return gameSession;
+
+        }
+
+        private async Task ConvertToEntityAndUpdateDatabase(GameSessionDto gameSessionDto)
+        {
+            var gameSessionEntity = await _gameSessionRepository.GetSessionById(gameSessionDto.SessionId);
+
+            _mapper.Map(gameSessionDto, gameSessionEntity);
+
+            await _gameSessionRepository.Update(gameSessionEntity);
+
+        }
+
+        private Tuple<int, int> PlacePawnInColumn(int[,]? gameBoard, int colIndex, PawnType pawnType)
+        {
+            for (var i = gameBoard.GetLength(0) - 1; i >= 0; i--)
+            {
+                if (gameBoard[i, colIndex] == 0)
+                {
+                    gameBoard[i, colIndex] = (int)pawnType;
+                    return new(i, colIndex);
+                }
+            }
+
+            throw new Exception("Invalid Pawn Position");
         }
 
         private GameSession CreateGameSession(Player player)
@@ -74,5 +208,21 @@ namespace BusinessLogic
                 StaringTime = DateTime.Now
             };
         }
+
+        private async Task<GameSessionDto> InvokeMethodAndUpdateWrapper(Guid gameSessionId, Func<GameSessionDto, Task> method)
+        {
+            var gameSessionEntity = await _gameSessionRepository.GetSessionById(gameSessionId);
+            var gameSession = _mapper.Map<GameSessionDto>(gameSessionEntity);
+
+            await method(gameSession);
+
+            _mapper.Map(gameSession, gameSessionEntity);
+            await _gameSessionRepository.Update(gameSessionEntity);
+
+            return gameSession;
+        }
+
+
+
     }
-}
+}   

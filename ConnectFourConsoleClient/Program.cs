@@ -1,7 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Model.bounderies;
 using Model.Dtos;
-using System.Numerics;
 using System.Text;
 using System.Text.Json;
 
@@ -27,9 +26,11 @@ while (!startGame)
             Console.WriteLine("Invalid input");
             break;
     };
+    Console.ReadLine();
 }
 
 string userInput = string.Empty;
+
 
 
 PlayerDto player = await RegisterPlayer(client);
@@ -53,9 +54,12 @@ while (userInput != ConsoleKey.E.ToString())
 
 async Task<bool> PlacePawn(HttpClient client, GameSessionDto session, int col)
 {
-    var startGameUrl = "api/game/" + session + "/" + col;
+    var startGameUrl = "api/game/" + session.SessionId;
 
-    HttpResponseMessage response = await client?.GetAsync(startGameUrl);
+    var json = JsonSerializer.Serialize(1);
+    var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+    HttpResponseMessage response = await client?.PostAsync(startGameUrl, content);
 
     string responseContent = await response.Content.ReadAsStringAsync();
 

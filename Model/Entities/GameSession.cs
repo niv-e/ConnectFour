@@ -15,12 +15,13 @@ namespace Model.Entities
         public Guid SessionId { get; set; }
         
         [ForeignKey("GameStateId")]
-        public GameState? GameState { get; set; }
+        public virtual GameState? GameState { get; set; }
         
         [ForeignKey("PlayerId")]
         public Player? Player { get; set; }
 
         public DateTime StaringTime { get; set; }
         public TimeSpan GameDuration { get; set; }
+
     }
 }
