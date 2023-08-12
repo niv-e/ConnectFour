@@ -1,14 +1,10 @@
 ﻿using AutoMapper;
 using BusinessLogic.Contracts;
+using BusinessLogic.Model.Boundaries;
+using DAL.Contracts;
+using DAL.Entities;
 using Microsoft.Extensions.Logging;
-using Model.bounderies;
-using Model.Dtos;
-using Model.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Numerics;
 
 namespace BusinessLogic
 {
@@ -26,7 +22,7 @@ namespace BusinessLogic
         }
 
 
-        public async Task<Player> RegisterPlayer(PlayerBoundary playerBoundary)
+        public async Task<PlayerBoundary> RegisterPlayer(PlayerBoundary playerBoundary)
         {
             try
             {
@@ -40,7 +36,7 @@ namespace BusinessLogic
 
                 _logger.LogDebug("Player : {Player} was inserted to the database", player);
 
-                return player;
+                return _mapper.Map<PlayerBoundary>(player);
 
             }
             catch (Exception e)
@@ -50,9 +46,28 @@ namespace BusinessLogic
             }
         }
 
-        public Task<Player?> GetPlayerById(int id)
+        public async Task<PlayerBoundary?> GetPlayerById(int id)
         {
-            return _playerRepository.GetPlayerById(id);
+            Player? player = await _playerRepository.GetPlayerById(id);
+
+            return _mapper.Map<PlayerBoundary>(player);
+
+        }
+
+        public async Task<bool> DeletePlayerById(int id)
+        {
+            await _playerRepository
+                .DeletePlayer(id);
+
+            return true;
+        }
+
+        public Task<bool> UpdatePlayer(PlayerBoundary playerBoundary)
+        {
+            Player player = _mapper.Map<PlayerBoundary, Player>(playerBoundary);
+
+            return _playerRepository.UpdatePlayer(player);
+
         }
     }
 }

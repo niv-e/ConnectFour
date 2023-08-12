@@ -1,6 +1,6 @@
-﻿using BusinessLogic.Responses;
-using Model.Dtos;
-using Model.Entities;
+﻿using BusinessLogic.Model.Boundaries;
+using BusinessLogic.Model.Dtos;
+using BusinessLogic.Responses;
 
 namespace BusinessLogic.Contracts
 {
@@ -10,6 +10,7 @@ namespace BusinessLogic.Contracts
         Task<GameSessionDto?> GetSessionById(Guid sessionId);
         Task<IEnumerable<Tuple<int, int>>> TryToGetWinnerSequence(Guid gameSessionId);
         Task<PlacePawnResponse> PlacePawn(Guid gameSessionId, int colIndex);
-        Task<GameSessionDto> StartGame(Player player);
+        Task<GameSessionDto> StartGame(PlayerBoundary player);
+        Task<bool> DeleteGameByGuid(Guid guid);
     }
 }

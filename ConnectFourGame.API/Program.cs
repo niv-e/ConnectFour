@@ -1,15 +1,13 @@
 using BusinessLogic;
 using BusinessLogic.BoardCheck;
 using BusinessLogic.Contracts;
+using BusinessLogic.Model.Mappers;
+using DAL;
+using DAL.Contracts;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Model.Entities;
-using Model.Mappers;
 using Serilog;
 
- var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("serilogsettings.json");
 
 // Add services to the container.
@@ -61,6 +59,7 @@ static void AddCustomServices(WebApplicationBuilder builder)
     builder.Services.AddScoped<IGameSessionRepository, GameSessionRepository>();
     builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
     builder.Services.AddScoped<IPlayerService, PlayerService>();
+    builder.Services.AddScoped<IQueriesRepository, QueriesRepository>();
     builder.Services.AddScoped<IGameService, GameService>();
     builder.Services.AddScoped<IBoardChecker, BoardChecker>();
 }

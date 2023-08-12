@@ -1,15 +1,13 @@
 ﻿using AutoMapper;
 using BusinessLogic.Contracts;
+using BusinessLogic.Model.Boundaries;
+using BusinessLogic.Model.Dtos;
 using Microsoft.AspNetCore.Mvc;
-using Model.bounderies;
-using Model.Dtos;
-using Model.Entities;
 
 namespace ConnectFourGame.API.Controllers
 {
     [Route("api/profile")]
     [ApiController]
-
     public class ProfileManagementController : ControllerBase
     {
         private readonly IPlayerService _playerService;
@@ -25,14 +23,12 @@ namespace ConnectFourGame.API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<PlayerDto>> RegisterPlayer(
+        public async Task<ActionResult<PlayerBoundary>> RegisterPlayer(
             PlayerBoundary playerBoundary)
         {
             try
             {
-                Player player = await _playerService.RegisterPlayer(playerBoundary);
-
-                return Ok(_mapper.Map<Player,PlayerDto>(player));
+                 return await _playerService.RegisterPlayer(playerBoundary);
             }catch (Exception ex)
             {
                 return BadRequest(ex.Message);
@@ -40,13 +36,15 @@ namespace ConnectFourGame.API.Controllers
         }
 
         [HttpGet("{playerid}", Name = "GetPlayerById")]
-        public async Task<ActionResult<PlayerDto>> GetPlayerById(int playerid)
+        public async Task<ActionResult<PlayerBoundary>> GetPlayerById(int playerid)
         {
             try
             {
-                Player player = await _playerService.GetPlayerById(playerid);
+                PlayerBoundary? foundedPlayer = await _playerService.GetPlayerById(playerid);
 
-                return Ok(_mapper.Map<Player, PlayerDto>(player));
+                return foundedPlayer is null ?
+                    BadRequest($"Could not found player with id {playerid}") : 
+                    foundedPlayer;
             }
             catch (Exception ex)
             {

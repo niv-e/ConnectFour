@@ -1,0 +1,47 @@
+﻿@page
+@model UpdatesModel
+@{
+    ViewData["Title"] = "Updates";
+}
+
+<h2>Player Updates</h2>
+
+<form method="post" asp-page-handler="UpdatePlayer" mb-3>
+    <div class="form-group">
+        <label asp-for="PlayerIdToUpdate">Player ID to Update:</label>
+        <input asp-for="PlayerIdToUpdate" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="FirstNameToUpdate">First Name:</label>
+        <input asp-for="FirstNameToUpdate" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="PhoneNumberToUpdate">Phone Number:</label>
+        <input asp-for="PhoneNumberToUpdate" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="CountryToUpdate">Country:</label>
+        <input asp-for="CountryToUpdate" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Update Player</button>
+</form>
+
+<h2>Delete Player by ID</h2>
+
+<form method="post" asp-page-handler="DeletePlayer" mb-3>
+    <div class="form-group>
+        <label asp-for="PlayerIdToDelete">Player ID to Delete:</label>
+        <input asp-for="PlayerIdToDelete" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-danger">Delete Player</button>
+</form>
+
+<h2>Delete Game by ID</h2>
+
+<form method="post" asp-page-handler="DeleteGame" mb-3>
+    <div class="form-group-md-3">
+        <label asp-for="GameIdToDelete">Game ID to Delete:</label>
+        <input asp-for="GameIdToDelete" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-danger">Delete Game</button>
+</form>

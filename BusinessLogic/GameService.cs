@@ -2,15 +2,12 @@
 using AutoMapper;
 using BusinessLogic.BoardCheck;
 using BusinessLogic.Contracts;
+using BusinessLogic.Model.Boundaries;
+using BusinessLogic.Model.Dtos;
 using BusinessLogic.Responses;
-using Microsoft.Extensions.Caching.Memory;
+using DAL.Contracts;
+using DAL.Entities;
 using Microsoft.Extensions.Logging;
-using Model.Dtos;
-using Model.Entities;
-using System.ComponentModel.Design;
-using System.Drawing;
-using System.Linq;
-using System.Text.Json;
 
 namespace BusinessLogic
 {
@@ -90,8 +87,10 @@ namespace BusinessLogic
 
         }
 
-        public async Task<GameSessionDto> StartGame(Player player)
+        public async Task<GameSessionDto> StartGame(PlayerBoundary playerBoundary)
         {
+            var player = _mapper.Map<Player>(playerBoundary);
+
             GameSession session = CreateGameSession(player);
 
             await _gameSessionRepository.Insert(session);
@@ -222,7 +221,9 @@ namespace BusinessLogic
             return gameSession;
         }
 
-
-
+        public Task<bool> DeleteGameByGuid(Guid guid)
+        {
+            return _gameSessionRepository.DeleteGameById(guid);
+        }
     }
 }   

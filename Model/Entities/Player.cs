@@ -1,13 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Model.Entities
+namespace DAL.Entities
 {
     public class Player
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public int PlayerId { get; init; }
+        public int PlayerId { get; set; }
 
         [Required(ErrorMessage = "First name is a mandatory field")]
         [MinLength(2, ErrorMessage = "First name must have atleaste 2 characters")]

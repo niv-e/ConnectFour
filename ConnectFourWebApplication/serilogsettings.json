@@ -1,0 +1,30 @@
+﻿{
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Debug",
+      "Override": {
+        "Microsoft": "Information"
+      }
+    },
+    "Using": [ "Serilog.Sinks.Console", "Serilog.Sinks.File" ],
+    "WriteTo": [
+      {
+        "Name": "Console",
+        "Args": {
+          "outputTemplate": "[{Timestamp:yyyy/MM/dd HH:mm:ss} {Level:u10}] {Message:lj} {NewLine}{Exception}{NewLine}",
+          "theme": "Serilog.Sinks.SystemConsole.Themes.SystemConsoleTheme::Literate, Serilog.Sinks.Console"
+        }
+      },
+      {
+        "Name": "File",
+        "Args": {
+          "outputTemplate": "[{Timestamp:yyyy/MM/dd HH:mm:ss} {Level:u10}] {Message:lj} {NewLine}{Exception}{NewLine}",
+          "path": "logs/connectFour.log",
+          "shared": "true",
+          "fileSizeLimitBytes": "1000000",
+          "rollOnFileSizeLimit": true
+        }
+      }
+    ]
+  }
+}

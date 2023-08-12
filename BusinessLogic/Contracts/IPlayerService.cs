@@ -1,12 +1,11 @@
-﻿using Model.bounderies;
-using Model.Dtos;
-using Model.Entities;
-
+﻿using BusinessLogic.Model.Boundaries;
 namespace BusinessLogic.Contracts
 {
     public interface IPlayerService
     {
-        Task<Player> RegisterPlayer(PlayerBoundary playerBoundary);
-        Task<Player?> GetPlayerById(int id);
+        Task<PlayerBoundary> RegisterPlayer(PlayerBoundary playerBoundary);
+        Task<PlayerBoundary?> GetPlayerById(int id);
+        Task<bool> DeletePlayerById(int id);
+        Task<bool> UpdatePlayer(PlayerBoundary playerBoundary);
     }
 }

@@ -1,11 +1,8 @@
 ﻿using AutoMapper;
-using BusinessLogic;
 using BusinessLogic.Contracts;
+using BusinessLogic.Model.Boundaries;
+using BusinessLogic.Model.Dtos;
 using Microsoft.AspNetCore.Mvc;
-using Model.Boundaries;
-using Model.Dtos;
-using Model.Entities;
-using System.Diagnostics.CodeAnalysis;
 
 namespace ConnectFourGame.API.Controllers
 {
@@ -37,7 +34,7 @@ namespace ConnectFourGame.API.Controllers
         {
             try
             {
-                Player? player = await _playerService.GetPlayerById(playerId);
+                PlayerBoundary? player = await _playerService.GetPlayerById(playerId);
 
                 if (player == null)
                 {

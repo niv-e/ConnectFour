@@ -1,0 +1,207 @@
+﻿@page
+@model ConnectFourWebApplication.Pages.Queries.IndexModel
+@Html.AntiForgeryToken()
+
+<div class="container p-3">
+    <div class="row">
+        <div class="col">
+            <h2 class="text-primary">Queris</h2>
+        </div>
+
+        <a class="btn btn-primary mb-1" onclick="ShowPlayersButtonClicked('Show Players')">Show Players</a>
+        <a class="btn btn-primary mb-1" onclick="DefaultButtonClicked('Get All Players Last Game Date Descending')">Get All Players Last Game Date Descending</a>
+        <a class="btn btn-primary mb-1" onclick="DefaultButtonClicked('Get All Games Details')">Get All Games Details</a>
+        <a class="btn btn-primary mb-1" onclick="DefaultButtonClicked('Get All Games Details Distinct')">Get All Games Details Distinct</a>
+        <a class="btn btn-primary mb-1" onclick="DefaultButtonClicked('Get All Players Games Count')">Get All Players Games Count</a>
+        <a class="btn btn-primary mb-1" onclick="DefaultButtonClicked('Get Players Per Game Count')">Get Players Per Game Count</a>
+        <a class="btn btn-primary mb-1" onclick="DefaultButtonClicked('Get Players Per Country')">Get Players Per Country</a>
+
+        <div class="col-md-6">
+        </div>
+    </div>
+</div>
+
+<form method="post" asp-page-handler="ShowAllPlayers">
+    <button type="submit" class="btn btn-primary">Show Players</button>
+
+    <div class="form-group">
+        <label asp-for="OrderByName">Oreder By Name:</label>
+        <input asp-for="OrderByName" class="form-check" />
+    </div>
+</form>
+<br />
+
+<form method="post" asp-page-handler="SelectedPlayer" mb-3>
+    <select class="form-select" asp-items="@Model.Players" asp-for="@Model.SelectedPlayer"></select>
+    <button type="submit" class="btn btn-primary">Submite</button>
+</form>
+
+<div class="col-md-9">
+    <h4>Result:</h4>
+    <div id="resultTable"></div>
+
+    @if (Model.PlayersDetails != null)
+    {
+        <table>
+            <thead>
+                <tr>
+                    @foreach (var column in Model.Columns)
+                    {
+                        <th>@column</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                        @foreach (var player in Model.PlayersDetails)
+                        {
+                    <tr>
+
+                            @foreach (var column in Model.Columns)
+                            {
+                                <td>
+                                    @player.GetType().GetProperty(column).GetValue(player)
+                                </td>
+                            }
+                    </tr>
+                        }
+                
+            </tbody>
+        </table>
+    }
+    else{
+        if (Model.SelectedPlayer != null)
+        {
+            <table>
+                <thead>
+                    <tr>
+                        @foreach (var column in Model.Columns)
+                        {
+                            <th>@column</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.SelectedPlayer != null)
+                    {
+                        <tr>
+                            @foreach (var column in Model.Columns)
+                            {
+                                <td>
+                                    @Model.SelectedPlayer.GetType().GetProperty(column).GetValue(Model.SelectedPlayer)
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        
+    }
+
+
+
+</div>
+
+
+
+
+
+@section Scripts {
+    <script type="text/javascript">
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var dropdown = document.querySelector(".form-select");
+
+            dropdown.addEventListener("change", function () {
+                var selectedValue = dropdown.value;
+                var selectedPlayerInput = document.querySelector("#SelectedPlayer");
+                selectedPlayerInput.value = selectedValue;
+            });
+        });
+
+        function ShowPlayersButtonClicked(_buttonName) {
+            fillTable({
+                buttonName: _buttonName,
+            })
+        }
+
+
+        function GetAllPlayerGamesButtonClicked(_buttonName) {
+
+            fillTable({
+                buttonName: _buttonName,
+            }, "/Queries?handler=SelectedPlayer");
+        }
+
+        function DefaultButtonClicked(_buttonName) {
+            fillTable({
+                buttonName: _buttonName,
+            })
+        }
+
+        function fillTable(requestData,customUrl) {
+            var url = "/Queries?handler=UpdateTable";
+
+            if (customUrl != null){
+                url = customUrl;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: requestData,
+                dataType: "json",
+                success: function (results) {
+
+                    // Create a table element
+                    var table = document.createElement('table');
+                    table.className = 'table';
+
+                    // Add table headers
+                    var thead = document.createElement('thead');
+                    var tr = document.createElement('tr');
+                    var headers = results[0].values;
+
+                    for (var i = 0; i < headers.length; i++) {
+                        var th = document.createElement('th');
+                        th.textContent = headers[i];
+                        tr.appendChild(th);
+                    }
+                    thead.appendChild(tr);
+                    table.appendChild(thead);
+
+                    // Add table rows
+                    var tbody = document.createElement('tbody');
+
+                    console.log(results);
+                    for (var i = 1; i < results.length; i++) {
+                        var tr = document.createElement('tr');
+                        for (var j = 0; j < results[i].values.length; j++) {
+                            var td = document.createElement('td');
+                            td.textContent = results[i].values[j];
+                            tr.appendChild(td);
+                        }
+                        tbody.appendChild(tr);
+                    }
+                    table.appendChild(tbody);
+
+                    // Add the table to the resultTable div
+                    var resultTable = document.getElementById('resultTable');
+                    resultTable.innerHTML = '';
+                    resultTable.appendChild(table);
+
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('An error occurred:', textStatus, errorThrown);
+                }
+            });
+
+        }
+    </script>
+
+}
+
+
+@{
+    
+}
