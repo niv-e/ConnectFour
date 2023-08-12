@@ -1,4 +1,5 @@
 ﻿using BusinessLogic.Responses;
+using ConnectFourWinformClient.Model;
 using Microsoft.Extensions.Configuration;
 using Model.Boundaries;
 using Model.bounderies;
@@ -25,6 +26,10 @@ namespace ConnectFourWinformClient
         private List<Tuple<int, int>> winerSequence;
         private Color winnerColor;
         private Color flickerColor = Color.White;
+        private SessionRecordsService sessionRecordsService;
+        private SessionRecordDto sessionRecord;
+        private List<GameStep>.Enumerator gameSteps;
+        private bool restoreEnded;
 
         public GameForm(PlayerBoundary playerBounder)
         {
@@ -42,6 +47,25 @@ namespace ConnectFourWinformClient
             computerTurnTimer.Tick += ComputerTurnTimer_Tick;
 
         }
+
+        public GameForm(Guid sessionId)
+        {
+            InitializeComponent();
+            InitializeServices();
+            _gameSessionId = sessionId;
+
+            flickerTimer = new Timer();
+            flickerTimer.Interval = 500; // Set the interval for color change (milliseconds)
+            flickerTimer.Tick += FlickerTimer_Tick;
+            flickerTimer.Start();
+
+            computerTurnTimer = new Timer();
+            computerTurnTimer.Interval = 500;
+            computerTurnTimer.Tick += RestoreGame_Tick;
+            computerTurnTimer.Start();
+
+        }
+
 
 
         public async Task FetchGameSessionAsync()
@@ -61,6 +85,7 @@ namespace ConnectFourWinformClient
             LoadConfiguration();
             _httpClient = new HttpClient();
             _httpClient.BaseAddress = new Uri(_configuration["GameApiUrl"]);
+            sessionRecordsService = new SessionRecordsService(new ClientDbContext());
 
         }
         private void LoadConfiguration()
@@ -81,9 +106,9 @@ namespace ConnectFourWinformClient
                 return;
             }
 
-            //var gameSession = await GetGameSessionAsync(_gameSessionId);
-
             PlacePawnResponse response = await TryToPlacePawnAsync(_gameSessionId, button.TabIndex);
+
+            await SaveStepToDatabase(response);
 
             DrawPawnOnBoard(response.Position, playerColor);
 
@@ -91,7 +116,17 @@ namespace ConnectFourWinformClient
 
             ShowMessageIfGameEnded(response);
 
+        }
 
+        private Task SaveStepToDatabase(PlacePawnResponse response)
+        {
+
+            var gameStep = new GameStep();
+
+            gameStep.PawnType = response.IsPlayerTurn ? PawnType.Player : PawnType.Server;
+            gameStep.Position = response.Position;
+
+            return sessionRecordsService.SaveStep(_gameSessionId, gameStep);
         }
 
         private async void ShowMessageIfGameEnded(PlacePawnResponse response)
@@ -101,9 +136,11 @@ namespace ConnectFourWinformClient
                 computerTurnTimer.Enabled = false;
                 winerSequence = await GetWinnerSequenceAsync(_gameSessionId);
                 winnerColor = response.IsPlayerTurn ? playerColor : computerColor;
-                string status = response.IsPlayerTurn ? "WON" : "Losed";
+                string status = response.IsPlayerTurn ? "WON" : "LOSE";
                 AlertEndWithStatusMessage(status);
                 SetFormEnabled(false);
+
+                computerTurnTimer.Stop();
 
                 flickerTimer.Start();
 
@@ -127,6 +164,41 @@ namespace ConnectFourWinformClient
         private void AlertGameOverMessage()
         {
             ShowMessageBoxWithButton($"GameOver");
+        }
+        private void ShowMessageBoxWithExitButton(string text)
+        {
+            if(restoreEnded) { return; }
+
+            restoreEnded = true;
+
+            // Create a new instance of the MessageBox
+            var messageBox = new Form();
+
+            // Set the properties of the message box
+            messageBox.Text = text;
+            messageBox.FormBorderStyle = FormBorderStyle.FixedDialog;
+            messageBox.StartPosition = FormStartPosition.CenterParent;
+            messageBox.Name = "Connect Four";
+            messageBox.Width = 40;
+            messageBox.Height = 100;
+            // Create a button inside the message box
+            var restartButton = new Button();
+            restartButton.Text = "Exit";
+            restartButton.Dock = DockStyle.Fill;
+
+
+            // Add a click event handler for the button
+            restartButton.Click += async (s, args) =>
+            {
+                // start new game session when the button is clicked
+                Application.Exit();
+            };
+
+            // Add the button to the message box
+            messageBox.Controls.Add(restartButton);
+
+            // Show the message box as a modal dialog
+            messageBox.ShowDialog();
         }
 
         private void ShowMessageBoxWithButton(string text)
@@ -218,9 +290,54 @@ namespace ConnectFourWinformClient
             _ = FetchGameSessionAsync();
         }
 
+        private IEnumerable<GameStep> GetNextStepToRestore()
+        {
+            foreach(var step in sessionRecord.GameSteps)
+            {
+                yield return step;
+            }
+
+        }
+
+        private async void RestoreGame_Tick(object? sender, EventArgs e) 
+        {
+            if(sessionRecord == null)
+            {
+                SetFormEnabled(false);
+
+                sessionRecord = await sessionRecordsService.GetRecordBySessionId(_gameSessionId);
+
+                gameSteps = sessionRecord.GameSteps.GetEnumerator();
+            }
+
+
+            if (!gameSteps.MoveNext())
+            {
+
+                ShowMessageBoxWithExitButton("Game Was Restored");
+                
+                computerTurnTimer.Stop();
+
+                return;
+
+            }
+
+            var nextStep = gameSteps.Current;
+
+            var color = nextStep.PawnType == PawnType.Player ? playerColor : computerColor;
+
+            DrawPawnOnBoard(nextStep.Position, color);
+
+            GetNextStepToRestore()
+                .GetEnumerator()
+                .MoveNext();
+
+        }
         private async void ComputerTurnTimer_Tick(object? sender, EventArgs e)
         {
             PlacePawnResponse response = await GetOpponentMoveAsync(_gameSessionId);
+
+            await SaveStepToDatabase(response);
 
             DrawPawnOnBoard(response.Position, computerColor);
 

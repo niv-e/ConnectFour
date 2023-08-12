@@ -10,6 +10,7 @@ namespace ConnectFourWinformClient
         private HttpClient _httpClient;
         private IConfiguration _configuration;
 
+
         public MenuForm()
         {
             InitializeComponent();
@@ -19,6 +20,8 @@ namespace ConnectFourWinformClient
 
         private async void button1_Click(object sender, EventArgs e)
         {
+            this.Enabled = false;
+
             var playerId = PlayerIdTextBox.Text;
 
             HttpResponseMessage response = await _httpClient.GetAsync($"{_httpClient.BaseAddress}/{playerId}");
@@ -56,5 +59,18 @@ namespace ConnectFourWinformClient
             _configuration = builder.Build();
         }
 
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Guid sessionId = Guid.Parse(GuidToRestoreTextBox.Text);
+            this.Visible = false;
+            GameForm gameForm = new(sessionId);
+            gameForm.Show();
+
+        }
     }
 }
